@@ -1,0 +1,9 @@
+*.csv
+*.txt
+*.pkl
+*.npy
+*.csv/#
+*.ini
+credentials.json
+*.png
+data/
