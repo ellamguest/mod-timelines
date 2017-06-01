@@ -1,9 +1,9 @@
-*.csv
+credentials.json
 *.txt
 *.pkl
-*.npy
-*.csv/#
-*.ini
-credentials.json
+*.pyc
+*.csv
 *.png
 data/
+moding-data/
+raw-data/

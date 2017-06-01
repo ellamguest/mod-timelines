@@ -55,6 +55,8 @@ def get_lists(df):
     '''
     names = list(set((df[df['name']!='AutoModerator']['name'])))
 
+    print('Pulling moderated sub lists...')
+    logging.info('Pulling moderated sub lists...')
     d = {}
     errors = [] # errors are mods for whom mod sub lists were not retrieved
     n = len(names)
@@ -88,9 +90,31 @@ def get_lists(df):
     nodelist = pd.DataFrame(list(set(edgelist['mod'])) + list(set(edgelist['sub'])))
     modes = [1]*len(list(set(edgelist['mod']))) + [0]*len(list(set(edgelist['sub'])))
     nodelist['type'] = modes
-    nodelist.rename(columns={0 : 'name'}, inplace=True)
+    nodelist.rename(columns={0 : 'mod'}, inplace=True)
     nodelist['mod_types'] = nodelist.apply(lambda row: get_mod_type(df, row['mod'], row['type']), axis=1)
     
+    mod_types = []
+    
+    current = df['pubdate'].max()
+    subset = df[df['name']==name]
+    for name in edgelist['mod']:
+        print(name)
+        mode = nodelist[nodelist['mod']==name]
+        if mode == 0:
+            print(0)
+        if current not in list(subset['pubdate']):
+            if '+all' not in list(subset['permissions']):
+                print(1)
+            else:
+                print(2)
+        if current in list(subset['pubdate']):
+            if '+all' not in list(subset['permissions']):
+                print(3)
+            else:
+                print(4)
+        else:
+            print('ERROR')
+        
 
 def save_lists(sub):
     logging.info('Running for {}...'.format(sub))
@@ -100,7 +124,8 @@ def save_lists(sub):
     
     logging.info('opening mod hist')
     df = pd.read_csv(df_path, index_col=0)
-    logging.info('Getting lists')
+    logging.info('Getting lists...')
+    df = df.head(n=20)
     errors, edgelist, nodelist = get_lists(df)
     
     logging.info('storing errors')
