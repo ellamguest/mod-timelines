@@ -5,10 +5,6 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import LinearSegmentedColormap
 import numpy as np
 
-### UPDATE CMV + TD MOD TIMELINES
-import update_cmv_mod_hist
-import update_td_mod_hist
-
 ### FUCNTIONS TO CONVERT MOD INSTANCES DF TO MOD PRESENCE TIMELINE
 def prep_df(df):
     '''subset df into required columns and types
@@ -84,16 +80,18 @@ def td_data():
 
 def td_plot():
     td_df = pd.read_csv('/Users/emg/Programming/GitHub/mod-timelines/tidy-data/td-mod-hist.csv', index_col=0)
+#    td_df = pd.read_csv('/Users/emg/Programming/GitHub/mod-timelines/mod-list-data/td/history.csv', index_col=0)
     td_timeline = timeline_df(td_df)
     #td_timeline = td_timeline[td_timeline.sum()[td_timeline.sum()>60].index]
      
-    plt.figure(figsize=(15,9.27))
+    fig = plt.figure(figsize=(15,9.27))
     ax = sns.heatmap(td_timeline, cmap=set_cmap())
    
     start, end = ax.get_ylim()
     ax.set_yticks(np.arange(start, end, 60))
     ax.set_yticklabels(list(td_timeline.index.strftime('%Y-%m')[::-60]))
-    plt.tick_params(axis='x',which='both', labelbottom='off')
+    #plt.tick_params(axis='x',which='both', labelbottom='off')
+    plt.tick_params(axis='x',which='both', labelsize=8)
     
     plt.title('r/The_Donald Moderator Presence Timeline')
     plt.xlabel('r/The_Donald Moderators', labelpad=20)
@@ -117,18 +115,19 @@ def td_plot():
     plt.legend(loc=9)
     
     plt.tight_layout()
-    plt.savefig('/Users/emg/Programming/GitHub/mod-timelines/figures/td-mod-timeline.png')
+    plt.savefig('/Users/emg/Programming/GitHub/mod-timelines/figures/td-mod-timeline.png', dpi=fig.dpi)
 
 def cmv_plot():
-    cmv_df = pd.read_csv('/Users/emg/Programming/GitHub/mod-timelines/tidy-data/cmv-mod-hist.csv', index_col=0)
+#    cmv_df = pd.read_csv('/Users/emg/Programming/GitHub/mod-timelines/tidy-data/cmv-mod-hist.csv', index_col=0)
+    cmv_df = pd.read_csv('/Users/emg/Programming/GitHub/mod-timelines/mod-list-data/cmv/history.csv', index_col=0)
     cmv_timeline = timeline_df(cmv_df)
     
-    plt.figure(figsize=(8.5, 12.135))
+    fig = plt.figure(figsize=(8.5, 12.135))
     ax = sns.heatmap(cmv_timeline, cmap=set_cmap())
     start, end = ax.get_ylim()
     ax.set_yticks(np.arange(start, end, 120))
     ax.set_yticklabels(list(cmv_timeline.index.strftime('%Y-%m')[::-120]))
-    plt.tick_params(axis='x',which='both', labelbottom='off')
+    #plt.tick_params(axis='x',which='both', labelbottom='off')
     
     plt.title('CMV Moderator Presence Timeline', y=1.03, x=0.4, fontweight='bold')
     plt.xlabel('r/ChangeMyView Moderators',  labelpad=20)
@@ -142,7 +141,7 @@ def cmv_plot():
                              'Current top'])
     
     plt.tight_layout()
-    plt.savefig('/Users/emg/Programming/GitHub/mod-timelines/figures/cmv-mod-timeline.png')
+    plt.savefig('/Users/emg/Programming/GitHub/mod-timelines/figures/cmv-mod-timeline.png', dpi=fig.dpi)
 
 
 

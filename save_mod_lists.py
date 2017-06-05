@@ -13,29 +13,29 @@ from datetime import date
 import os
 import time
 
-def update_mod_list(sub, name):
+def update_mod_list(subreddit):
     '''master copy of mod-list must exist at
     'mod-list-data/{sub}/master.csv'
     
     sub = 'cmv' or 'td'
     name = 'changemyview' or 'The_Donald'
     '''
-    print('Opening master of {} mod history'.format(name))
-    master_path = os.path.join('mod-list-data', '{}'.format(sub), 'master.csv')
+    print('Opening master of {} mod history'.format(subreddit))
+    master_path = os.path.join('mod-list-data', '{}'.format(subreddit), 'master.csv')
     master = pd.read_csv(master_path)
     
-    print('Getting current mod list for {}'.format(name))
-    url = 'https://www.reddit.com/r/{}/about/moderators.json'.format(name)
+    print('Getting current mod list for {}'.format(subreddit))
+    url = 'https://www.reddit.com/r/{}/about/moderators.json'.format(subreddit)
     r = requests.get(url, headers={'user-agent':'why_ask_reddit-Bot'})
     data = r.json()
     
-    mod_list_path = os.path.join('mod-list-data', '{}'.format(sub), '{}.json'.format(str(date.today())))
+    mod_list_path = os.path.join('mod-list-data', '{}'.format(subreddit), '{}.json'.format(str(date.today())))
     os.makedirs(os.path.dirname(mod_list_path), exist_ok=True)
     
     with open(mod_list_path, 'w') as f:
         json.dump(data, f)
     
-    print('Updating master of {} mod history'.format(name))
+    print('Updating master of {} mod history'.format(subreddit))
     d = {}
     for c in data['data']['children']:
         d[c['name']] = [c['date'], c['mod_permissions'], c['author_flair_text']]
@@ -53,7 +53,7 @@ def update_mod_list(sub, name):
     updated.to_csv(master_path, index=False)
     
 def run():
-    update_mod_list('td', 'The_Donald')
+    update_mod_list('The_Donald')
     time.sleep(2)
     print('')
-    update_mod_list('cmv', 'changemyview')
+    update_mod_list('changemyview')

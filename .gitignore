@@ -7,3 +7,6 @@ credentials.json
 data/
 moding-data/
 raw-data/
+*.json
+*.ini
+*.csv#

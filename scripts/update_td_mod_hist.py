@@ -186,5 +186,6 @@ def update_td_mod_timeline():
     df.reset_index(drop=True, inplace=True)
 
     df.to_csv('/Users/emg/Programming/GitHub/mod-timelines/tidy-data/td-mod-hist.csv')
+    df.to_csv('/Users/emg/Programming/GitHub/mod-timelines/mod-list-data/td/history.csv')
 
 update_td_mod_timeline()

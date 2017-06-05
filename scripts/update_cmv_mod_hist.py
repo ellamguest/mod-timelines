@@ -195,6 +195,6 @@ def update_cmv_mod_timeline():
     df.sort_values(['date', 'pubdate'], inplace=True)
     df.reset_index(drop=True, inplace=True)
     
-    df.to_csv('/Users/emg/Programming/GitHub/mod-timelines/tidy-data/cmv-mod-hist.csv')
+    df.to_csv('/Users/emg/Programming/GitHub/mod-timelines/mod-list-data/cmv/history.csv')
 
 update_cmv_mod_timeline()
