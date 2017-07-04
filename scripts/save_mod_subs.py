@@ -107,13 +107,13 @@ def edgelist(subreddit, subname, master):
     return edgelist
 
 
-def nodelist(subreddit, subname, edgelist, df):
+def nodelist(subreddit, subname, edgelist, master):
     print('MAKING {} NODELIST...'.format(subname))
     d = {}
     d['name'] = list(set(edgelist['name'])) + list(set(edgelist['sub']))
     d['type'] = [1]*len(list(set(edgelist['name']))) + [0]*len(list(set(edgelist['sub'])))
     nodelist = pd.DataFrame.from_dict(d, orient='columns')
-    nodelist['mod_type'] = nodelist.apply(lambda row: get_mod_type(df, row['name'], row['type']), axis=1)
+    nodelist['mod_type'] = nodelist.apply(lambda row: get_mod_type(master, row['name'], row['type']), axis=1)
     
     nodelist_path = os.path.join('moding-data', subreddit, str(date.today()), 'lists', 'nodelist.csv')
     os.makedirs(os.path.dirname(nodelist_path), exist_ok=True)
@@ -135,7 +135,7 @@ def run(subreddit, subname):
     nodelist(subreddit, subname, e, master)
     
 def run_both():
-    run('td', 'The_Donald')
+    #run('td', 'The_Donald')
     print()
     print()
     run('cmv', 'changemyview')

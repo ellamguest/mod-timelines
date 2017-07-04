@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Jun 22 14:34:45 2017
-
-@author: emg
-"""
-
 import pandas as pd
 import requests
 import json
@@ -51,7 +45,7 @@ def update_mod_list(subreddit, name):
     updated = pd.concat([master,df])
     updated.reset_index(drop=True, inplace=True)
     updated.to_csv(master_path, index=False)
-  
+    
 def save_moderated_subreddits_json(user, subreddit):
     url = 'https://www.reddit.com/user/{}/moderated_subreddits.json'.format(user)
     r = requests.get(url, headers = {'user-agent':'ThisIsABot'})
@@ -67,7 +61,6 @@ def save_moderated_subreddits_json(user, subreddit):
     
     return data
       
-
 def open_moderated_subreddits_json(user, subreddit):
     path = os.path.join('moding-data', '{}'.format(subreddit), str(date.today()), '{}.json'.format(user))
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -75,8 +68,7 @@ def open_moderated_subreddits_json(user, subreddit):
     with open(path, 'r') as f:
         data = json.load(f)
     
-    return data
-    
+    return data  
 
 def json_to_df(data, user):
     '''data is a json objecy
@@ -99,8 +91,26 @@ def json_to_df(data, user):
     
     return df
     
-def edgelist(subreddit, subname, df):
-    names = list(df['name'].unique())
+def get_mod_type(df, user, mode=0):
+    current = df['pubdate'].max()
+    subset = df[df['name']==user]
+    if mode == 0:
+        return 0
+    if current not in list(subset['pubdate']):
+        if "['all']" not in list(subset['permissions']):
+            return 1
+        else:
+            return 2
+    if current in list(subset['pubdate']):
+        if "['all']" not in list(subset['permissions']):
+            return 3
+        else:
+            return 4
+    else:
+        return 'ERROR'    
+
+def edgelist(subreddit, subname, master):
+    names = list(master['name'].unique())
     names.remove('AutoModerator')
     
     dfs = []
@@ -126,39 +136,19 @@ def edgelist(subreddit, subname, df):
 
     return edgelist
 
-def get_mod_type(df, user, mode=0):
-    df = df.head(20)
-    current = df['pubdate'].max()
-    subset = df[df['name']==user]
-    if mode == 0:
-        return 0
-    if current not in list(subset['pubdate']):
-        if "['all']" not in list(subset['permissions']):
-            return 1
-        else:
-            return 2
-    if current in list(subset['pubdate']):
-        if "['all']" not in list(subset['permissions']):
-            return 3
-        else:
-            return 4
-    else:
-        return 'ERROR'    
-
-def nodelist(subreddit, subname, edgelist, df):
+def nodelist(subreddit, subname, edgelist, master):
     print('MAKING {} NODELIST...'.format(subname))
     d = {}
     d['name'] = list(set(edgelist['name'])) + list(set(edgelist['sub']))
     d['type'] = [1]*len(list(set(edgelist['name']))) + [0]*len(list(set(edgelist['sub'])))
     nodelist = pd.DataFrame.from_dict(d, orient='columns')
-    nodelist['mod_type'] = nodelist.apply(lambda row: get_mod_type(df, row['name'], row['type']), axis=1)
+    nodelist['mod_type'] = nodelist.apply(lambda row: get_mod_type(master, row['name'], row['type']), axis=1)
     
     nodelist_path = os.path.join('moding-data', subreddit, str(date.today()), 'lists', 'nodelist.csv')
     os.makedirs(os.path.dirname(nodelist_path), exist_ok=True)
     nodelist.to_csv(nodelist_path, index=False)
 
-
-def run_subreddit(subreddit, subname):
+def run(subreddit, subname):
     #update modtimelines first
     # sub = 'cmv' or 'td
     update_mod_list(subreddit, subname)
@@ -166,16 +156,16 @@ def run_subreddit(subreddit, subname):
     master = pd.read_csv(master_path)
     print ()
     print()
-    
-    print()
     e = edgelist(subreddit, subname, master)
     print()
-    
     nodelist(subreddit, subname, e, master)
     
-def run():
-    #run_subreddit('td', 'The_Donald')
-    #time.sleep(2)
+def run_both():
+    print('RUNNING THE_DONALD')
+    run('td', 'The_Donald')
+    time.sleep(2)
     print()
-    print()
-    run_subreddit('cmv', 'changemyview')    
+    print('RUNNING CHANGEMYVIEW')
+    run('cmv', 'changemyview')
+
+  
