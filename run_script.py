@@ -1,18 +1,57 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar  2 14:23:59 2017
+Created on Thu Jun 22 14:34:45 2017
 
 @author: emg
 """
+
 import pandas as pd
 import requests
 import json
-import time
 from datetime import date
 import os
+import time
 
-
+def update_mod_list(subreddit, name):
+    '''master copy of mod-list must exist at
+    'moding-data/{sub}/master.csv'
+    
+    subreddit = 'cmv' or 'td'
+    name = 'changemyview' or 'The_Donald'
+    '''
+    print('Opening master of {} mod history'.format(name))
+    master_path = os.path.join('moding-data', '{}'.format(subreddit), 'master.csv')
+    master = pd.read_csv(master_path)
+    
+    print('Getting current mod list for {}'.format(name))
+    url = 'https://www.reddit.com/r/{}/about/moderators.json'.format(name)
+    r = requests.get(url, headers={'user-agent':'why_ask_reddit-Bot'})
+    data = r.json()
+    
+    mod_list_path = os.path.join('moding-data', '{}'.format(subreddit), str(date.today()), '{}.json'.format(str(date.today())))
+    os.makedirs(os.path.dirname(mod_list_path), exist_ok=True)
+    
+    with open(mod_list_path, 'w') as f:
+        json.dump(data, f)
+    
+    print('Updating master of {} mod history'.format(subreddit))
+    d = {}
+    for c in data['data']['children']:
+        d[c['name']] = [c['date'], c['mod_permissions'], c['author_flair_text']]
+    
+    df = pd.DataFrame.from_dict(d, orient='index')
+    df.reset_index(inplace=True)
+    df.head()
+    df.rename(columns={'index':'name', 0:'date', 1:'permissions', 2:'author_flair_text'}, inplace=True)
+    df['date'] = pd.to_datetime(df['date'], unit='s')
+    df['pubdate'] = date.today()
+    df.head()
+    
+    updated = pd.concat([master,df])
+    updated.reset_index(drop=True, inplace=True)
+    updated.to_csv(master_path, index=False)
+  
 def save_moderated_subreddits_json(user, subreddit):
     url = 'https://www.reddit.com/user/{}/moderated_subreddits.json'.format(user)
     r = requests.get(url, headers = {'user-agent':'ThisIsABot'})
@@ -60,27 +99,8 @@ def json_to_df(data, user):
     
     return df
     
- 
-def get_mod_type(df, user, mode=0):
-    current = df['pubdate'].max()
-    subset = df[df['name']==user]
-    if mode == 0:
-        return 0
-    if current not in list(subset['pubdate']):
-        if "['all']" not in list(subset['permissions']):
-            return 1
-        else:
-            return 2
-    if current in list(subset['pubdate']):
-        if "['all']" not in list(subset['permissions']):
-            return 3
-        else:
-            return 4
-    else:
-        return 'ERROR'    
-
-def edgelist(subreddit, subname, master):
-    names = list(master['name'].unique())
+def edgelist(subreddit, subname, df):
+    names = list(df['name'].unique())
     names.remove('AutoModerator')
     
     dfs = []
@@ -106,6 +126,24 @@ def edgelist(subreddit, subname, master):
 
     return edgelist
 
+def get_mod_type(df, user, mode=0):
+    df = df.head(20)
+    current = df['pubdate'].max()
+    subset = df[df['name']==user]
+    if mode == 0:
+        return 0
+    if current not in list(subset['pubdate']):
+        if "['all']" not in list(subset['permissions']):
+            return 1
+        else:
+            return 2
+    if current in list(subset['pubdate']):
+        if "['all']" not in list(subset['permissions']):
+            return 3
+        else:
+            return 4
+    else:
+        return 'ERROR'    
 
 def nodelist(subreddit, subname, edgelist, df):
     print('MAKING {} NODELIST...'.format(subname))
@@ -120,9 +158,10 @@ def nodelist(subreddit, subname, edgelist, df):
     nodelist.to_csv(nodelist_path, index=False)
 
 
-def run(subreddit, subname):
+def run_subreddit(subreddit, subname):
     #update modtimelines first
     # sub = 'cmv' or 'td
+    update_mod_list(subreddit, subname)
     master_path = os.path.join('moding-data', '{}'.format(subreddit), 'master.csv')
     master = pd.read_csv(master_path)
     print ()
@@ -134,9 +173,9 @@ def run(subreddit, subname):
     
     nodelist(subreddit, subname, e, master)
     
-def run_both():
-    run('td', 'The_Donald')
+def run():
+    #run_subreddit('td', 'The_Donald')
+    #time.sleep(2)
     print()
     print()
-    run('cmv', 'changemyview')
-
+    run_subreddit('cmv', 'changemyview')    

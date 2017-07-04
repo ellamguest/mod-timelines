@@ -82,7 +82,7 @@ def td_plot():
     td_df = pd.read_csv('/Users/emg/Programming/GitHub/mod-timelines/tidy-data/td-mod-hist.csv', index_col=0)
 #    td_df = pd.read_csv('/Users/emg/Programming/GitHub/mod-timelines/mod-list-data/td/history.csv', index_col=0)
     td_timeline = timeline_df(td_df)
-    #td_timeline = td_timeline[td_timeline.sum()[td_timeline.sum()>60].index]
+    
      
     fig = plt.figure(figsize=(15,9.27))
     ax = sns.heatmap(td_timeline, cmap=set_cmap())
@@ -91,7 +91,7 @@ def td_plot():
     ax.set_yticks(np.arange(start, end, 60))
     ax.set_yticklabels(list(td_timeline.index.strftime('%Y-%m')[::-60]))
     #plt.tick_params(axis='x',which='both', labelbottom='off')
-    plt.tick_params(axis='x',which='both', labelsize=8)
+    plt.tick_params(axis='x',which='both', labelsize=6)
     
     plt.title('r/The_Donald Moderator Presence Timeline')
     plt.xlabel('r/The_Donald Moderators', labelpad=20)

@@ -13,23 +13,23 @@ from datetime import date
 import os
 import time
 
-def update_mod_list(subreddit):
+def update_mod_list(subreddit, name):
     '''master copy of mod-list must exist at
-    'mod-list-data/{sub}/master.csv'
+    'moding-data/{sub}/master.csv'
     
-    sub = 'cmv' or 'td'
+    subreddit = 'cmv' or 'td'
     name = 'changemyview' or 'The_Donald'
     '''
-    print('Opening master of {} mod history'.format(subreddit))
-    master_path = os.path.join('mod-list-data', '{}'.format(subreddit), 'master.csv')
+    print('Opening master of {} mod history'.format(name))
+    master_path = os.path.join('moding-data', '{}'.format(subreddit), 'master.csv')
     master = pd.read_csv(master_path)
     
-    print('Getting current mod list for {}'.format(subreddit))
-    url = 'https://www.reddit.com/r/{}/about/moderators.json'.format(subreddit)
+    print('Getting current mod list for {}'.format(name))
+    url = 'https://www.reddit.com/r/{}/about/moderators.json'.format(name)
     r = requests.get(url, headers={'user-agent':'why_ask_reddit-Bot'})
     data = r.json()
     
-    mod_list_path = os.path.join('mod-list-data', '{}'.format(subreddit), '{}.json'.format(str(date.today())))
+    mod_list_path = os.path.join('moding-data', '{}'.format(subreddit), str(date.today()), '{}.json'.format(str(date.today())))
     os.makedirs(os.path.dirname(mod_list_path), exist_ok=True)
     
     with open(mod_list_path, 'w') as f:
@@ -53,7 +53,7 @@ def update_mod_list(subreddit):
     updated.to_csv(master_path, index=False)
     
 def run():
-    update_mod_list('The_Donald')
+    update_mod_list('td', 'The_Donald')
     time.sleep(2)
     print('')
-    update_mod_list('changemyview')
+    update_mod_list('cmv', 'changemyview')

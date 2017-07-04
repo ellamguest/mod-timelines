@@ -159,7 +159,7 @@ def run_td_ais():
     save_snapshots(get_ais_snapshots())
     print('Saved ais snapshots - compiling mod df now...')
     df = compile_ais_snapshots()
-    print('Compiled mod df, saving now...')
+    print('Compiled ais mod df, saving now...')
     df.to_csv('/Users/emg/Programming/GitHub/mod-timelines/raw-data/td/ais-mod-df.csv')
 
 # wbm
@@ -169,7 +169,7 @@ def run_td_wbm():
     update_snapshots(times)
     print('Updated snapshots - compiling mod df')
     df = compile_dfs(times)
-    print('Finished compiling mod df')
+    print('Compiled wbm mod df, saving now...')
     df.to_csv('/Users/emg/Programming/GitHub/mod-timelines/raw-data/td/wbm-mod-df.csv')
 
 
@@ -180,12 +180,13 @@ def update_td_mod_timeline():
     td_ais = pd.read_csv('/Users/emg/Programming/GitHub/mod-timelines/raw-data/td/ais-mod-df.csv', index_col=0)
     td_wbm = pd.read_csv('/Users/emg/Programming/GitHub/mod-timelines/raw-data/td/wbm-mod-df.csv', index_col=0)
     
-
+    print('Compiling ais and wbm dfs...')
     df = pd.concat([td_ais,td_wbm])
     df.sort_values(['date', 'pubdate'], inplace=True)
     df.reset_index(drop=True, inplace=True)
 
+    print('Saving master td mod timeline...')
     df.to_csv('/Users/emg/Programming/GitHub/mod-timelines/tidy-data/td-mod-hist.csv')
-    df.to_csv('/Users/emg/Programming/GitHub/mod-timelines/mod-list-data/td/history.csv')
+    df.to_csv('/Users/emg/Programming/GitHub/mod-timelines/mod-list-data/td/master.csv')
 
 update_td_mod_timeline()
